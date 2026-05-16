@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbit — Space Launch Display</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0c0d10;
+  --surface: #13151a;
+  --border: #1d2027;
+  --border-up: #272b33;
+  --ink: #dde1e8;
+  --ink-mid: #8b909c;
+  --ink-dim: #404550;
+  --accent: #3ecf78;
+  --blue: #5aabff;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Lora', Georgia, serif;
+}
+
+html { background: var(--bg); color: var(--ink); font-family: var(--serif); }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* NAV */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 2.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.wordmark {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+.nav-right {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+}
+
+/* HERO */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1.14;
+  color: var(--ink);
+  margin-bottom: 1.4rem;
+  letter-spacing: -0.01em;
+}
+h1 em {
+  font-style: italic;
+  color: var(--ink-mid);
+}
+
+.hero-body {
+  font-size: 17px;
+  color: var(--ink-mid);
+  line-height: 1.75;
+  max-width: 480px;
+  margin-bottom: 3.2rem;
+}
+.hero-body strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* DEVICE */
+.device-wrap {
+  width: 100%;
+  max-width: 330px;
+  margin: 0 auto 3.5rem;
+}
+.device {
+  background: #111318;
+  border: 1px solid var(--border-up);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 0 #ffffff08 inset,
+    0 50px 100px #000000a0,
+    0 20px 40px #00000060;
+  transform: perspective(1000px) rotateX(5deg);
+  transform-origin: bottom center;
+}
+.device-bar {
+  background: #0d0f13;
+  border-bottom: 1px solid var(--border);
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.device-bar-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+.live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: breathe 2.2s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+.screen {
+  padding: 22px 22px 24px;
+  background: #0a0c0f;
+  font-family: var(--mono);
+}
+.s-mission { font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 2px; }
+.s-sub { font-size: 9px; color: var(--ink-dim); letter-spacing: 0.06em; margin-bottom: 18px; }
+.s-time {
+  font-size: 50px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.s-time-label { font-size: 8px; color: var(--ink-dim); letter-spacing: 0.22em; margin-bottom: 18px; }
+.s-rule { height: 1px; background: var(--border); margin-bottom: 14px; }
+.s-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 8px; }
+.sg-label { font-size: 8px; color: var(--ink-dim); letter-spacing: 0.14em; margin-bottom: 3px; }
+.sg-val { font-size: 12px; color: var(--blue); }
+.sg-val.wait { color: var(--ink-dim); }
+.device-foot {
+  height: 9px;
+  background: #0d0f13;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.usbc { width: 18px; height: 4px; border-radius: 2px; border: 1px solid var(--border-up); background: #09090c; }
+
+/* FORM */
+.form-area {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: left;
+}
+.form-hed {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.form-sub {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--ink-mid);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.form-row { display: flex; gap: 8px; }
+input[type="email"] {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border-up);
+  border-radius: 5px;
+  padding: 11px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 0;
+}
+input[type="email"]::placeholder { color: var(--ink-dim); }
+input[type="email"]:focus { border-color: var(--ink-mid); }
+button {
+  background: var(--ink);
+  border: none;
+  border-radius: 5px;
+  padding: 11px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--bg);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s, transform 0.1s;
+}
+button:hover { opacity: 0.88; }
+button:active { opacity: 0.7; transform: scale(0.98); }
+.form-fine {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+}
+.form-ok {
+  display: none;
+  margin-top: 14px;
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--accent);
+  font-style: italic;
+}
+
+/* ABOUT */
+.about {
+  border-top: 1px solid var(--border);
+  padding: 4rem 2.5rem;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem 5rem;
+}
+@media (max-width: 580px) {
+  .about { grid-template-columns: 1fr; gap: 2.5rem; padding: 3rem 1.5rem; }
+  nav, footer { padding: 1.2rem 1.5rem; }
+  .hero { padding: 3.5rem 1.5rem 2.5rem; }
+}
+.about-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.about-text {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--ink-mid);
+  line-height: 1.75;
+}
+.about-text strong { color: var(--ink); font-weight: 500; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.4rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.foot-l { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); letter-spacing: 0.06em; }
+.foot-r { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="wordmark">ORBIT</span>
+  <span class="nav-right">handmade in Austin, TX</span>
+</nav>
+
+<main class="hero">
+
+  <h1>Know when the rocket launches<br><em>before you check your phone.</em></h1>
+
+  <p class="hero-body">
+    A small display that sits on your desk and tracks every orbital launch —
+    live countdown, real-time telemetry during flight,
+    ISS position when it's quiet.
+    <strong>Always on. Never needs opening.</strong>
+  </p>
+
+  <div class="device-wrap">
+    <div class="device">
+      <div class="device-bar">
+        <span class="device-bar-label">Mission Tracker</span>
+        <span class="live"><span class="live-dot"></span>live</span>
+      </div>
+      <div class="screen">
+        <div class="s-mission">FALCON 9 · B1086</div>
+        <div class="s-sub">STARLINK GROUP 15 — SLC-40</div>
+        <div class="s-time" id="countdown">02:47:31</div>
+        <div class="s-time-label">UNTIL LAUNCH</div>
+        <div class="s-rule"></div>
+        <div class="s-grid">
+          <div>
+            <div class="sg-label">Altitude</div>
+            <div class="sg-val wait">pre-launch</div>
+          </div>
+          <div>
+            <div class="sg-label">Velocity</div>
+            <div class="sg-val wait">pre-launch</div>
+          </div>
+          <div>
+            <div class="sg-label">MECO</div>
+            <div class="sg-val wait">T+02:31</div>
+          </div>
+          <div>
+            <div class="sg-label">Landing</div>
+            <div class="sg-val wait">T+08:15</div>
+          </div>
+        </div>
+      </div>
+      <div class="device-foot"><div class="usbc"></div></div>
+    </div>
+  </div>
+
+  <div class="form-area">
+    <div class="form-hed">Want one?</div>
+    <div class="form-sub">I'm building a small first run. Leave your email and I'll reach out directly when it's ready — no mailing list, just a personal note from me.</div>
+    <div class="form-row">
+      <input type="email" id="email-input" placeholder="your@email.com" autocomplete="email">
+      <button id="submit-btn" onclick="handleSubmit()">I'm in</button>
+    </div>
+    <div class="form-fine" id="form-fine">No newsletter. No spam. Just one email when it ships.</div>
+    <div class="form-ok" id="form-ok">Got it — I'll be in touch personally.</div>
+  </div>
+
+</main>
+
+<div class="about">
+  <div class="about-block">
+    <div class="about-label">What it does</div>
+    <div class="about-text">
+      Counts down to the next launch. Shows live altitude and velocity once it lifts off.
+      Calls out mission milestones as they happen — MECO, stage sep, booster landing.
+      Between launches it switches to <strong>ISS position, orbit stats, and next launch in X days.</strong>
+      It earns desk space every day, not just launch days.
+    </div>
+  </div>
+  <div class="about-block">
+    <div class="about-label">How it's built</div>
+    <div class="about-text">
+      3D printed matte black enclosure, color IPS display behind a thin bezel,
+      USB-C powered, WiFi-connected. Pulls live data from the Space Devs API —
+      SpaceX, NASA, Rocket Lab, and more.
+      <strong>Target price around $79.</strong> Made to order, not mass produced.
+    </div>
+  </div>
+  <div class="about-block">
+    <div class="about-label">Who's building it</div>
+    <div class="about-text">
+      I'm a technical founder in Austin. I CAD, print, and program this myself.
+      This isn't a crowdfunding campaign — it's something I built because I wanted it on my desk
+      and figured other people might feel the same way.
+    </div>
+  </div>
+  <div class="about-block">
+    <div class="about-label">Timeline</div>
+    <div class="about-text">
+      Prototyping now. First units go to people who signed up early.
+      <strong>No promises on dates</strong> — I'd rather get it right than get it out fast.
+      If you sign up, you'll hear from me directly, not from a drip campaign.
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="foot-l">Orbit — desktop launch display</span>
+  <span class="foot-r">© 2026</span>
+</footer>
+
+<script>
+let h = 2, m = 47, s = 31;
+function tick() {
+  s--;
+  if (s < 0) { s = 59; m--; }
+  if (m < 0) { m = 59; h--; }
+  if (h < 0) { h = 0; m = 0; s = 0; }
+  const p = n => String(n).padStart(2, '0');
+  document.getElementById('countdown').textContent = `${p(h)}:${p(m)}:${p(s)}`;
+}
+setInterval(tick, 1000);
+
+function handleSubmit() {
+  const input = document.getElementById('email-input');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) { input.focus(); return; }
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '...';
+  btn.disabled = true;
+  fetch('https://formspree.io/f/mzdonjwj', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ email, _subject: 'Orbit — interest signup' })
+  })
+  .then(() => showOk())
+  .catch(() => { window.location.href = `mailto:trumanheaston@gmail.com?subject=Orbit interest&body=${email}`; });
+}
+
+function showOk() {
+  document.querySelector('.form-row').style.display = 'none';
+  document.getElementById('form-fine').style.display = 'none';
+  document.getElementById('form-ok').style.display = 'block';
+}
+
+document.getElementById('email-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleSubmit();
+});
+</script>
+</body>
+</html>
